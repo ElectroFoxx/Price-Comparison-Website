@@ -1,0 +1,31 @@
+Cel systemu
+
+Aplikacja ma umożliwić użytkownikom porównywanie cen produktów w różnych sklepach internetowych, zapewniając aktualne dane o cenach. Celem jest ułatwienie podejmowania decyzji zakupowych, śledzenie trendów cenowych oraz wyszukiwanie najlepszych okazji.
+
+
+Główne funkcje aplikacji
+
+	Wyszukiwanie produktów
+Użytkownik wprowadza nazwę produktu, a aplikacja przeszukuje bazy danych oraz zewnętrzne źródła w celu zebrania informacji o cenach.
+
+	Porównanie cen
+Wyniki prezentowane są w formie tabeli lub wykresu, pokazując ceny w różnych sklepach internetowych.
+
+	Powiadomienia
+System wysyła powiadomienia e-mail o spadkach cen obserwowanych produktów.
+
+	Historia cen
+Graficzna prezentacja zmian ceny w czasie, co pozwala użytkownikowi ocenić, czy aktualna oferta jest atrakcyjna.
+
+
+	Użytkownik:
+Rejestruje się i loguje do aplikacji.
+Wyszukuje produkty lub zgłasza chęć dodania produktu do monitorowanych.
+Przegląda wyniki/historię porównania cen.
+Dodaje produkty do listy obserwowanych.
+
+	System:
+Odpowiada na zapytania użytkownika.
+Zbiera dane o produktach z zewnętrznych serwisów.
+Aktualizuje dane o cenach na podstawie harmonogramu.
+Wysyła użytkownikom powiadomienia o zmianach cen.
