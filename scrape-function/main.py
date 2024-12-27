@@ -72,17 +72,23 @@ def scrape():
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
             java_script_enabled=True,
-            viewport={"width": 1920, "height": 1080},
+            viewport={"width": 1280, "height": 720},
         )
 
         page = context.new_page()
 
         page.route("**/*", block_aggressively)
         page.goto(f"{x_kom_link}{manufacturer_code}", wait_until="domcontentloaded")
-
-        # page.wait_for_selector("span.parts__Price-sc-6e255ce0-0")
-        price = page.query_selector("span.sc-jnqLxu").inner_text()
-        return price
+        
+        # check if x-kom website has an item
+        
+        element_text = page.query_selector("div.gGxjMd").inner_text()
+        
+        if element_text.startswith("Nie znaleźliśmy wyników dla"):
+            price_xkom = ""
+        else:
+            price = page.query_selector_all("span.sc-jnqLxu")[6].inner_text()
+            return price
 
 
 if __name__ == "__main__":
