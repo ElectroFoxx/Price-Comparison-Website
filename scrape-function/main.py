@@ -182,14 +182,15 @@ def main():
         data = scrape(manufacturer_code)
 
         insert_price = sqlalchemy.text(
-            "INSERT INTO prices (product_id, price_xkom, price_morele, price_media_expert) VALUES (:product_id, :price_xkom, :price_morele, :price_media_expert)"
+            "INSERT INTO prices (product_id, date, price_xkom, price_morele, price_media_expert) VALUES (:product_id, :date, :price_xkom, :price_morele, :price_media_expert)"
         )
-
+        print(inserted_id)
         with pool.connect() as db_conn:
             db_conn.execute(
                 insert_price,
                 parameters={
                     "product_id": inserted_id,
+                    "date": sqlalchemy.func.now(),
                     "price_xkom": data["x-kom"],
                     "price_morele": data["morele"],
                     "price_media_expert": data["media_expert"],
