@@ -19,8 +19,7 @@ def get_pool():
             "pg8000",
             user=db_user,
             password=db_pass,
-            db=db_name,
-            ip_type="PRIVATE",
+            db=db_name
         )
         return conn
 
