@@ -19,7 +19,7 @@ def get_pool():
             "pg8000",
             user=db_user,
             password=db_pass,
-            db=db_name
+            db=db_name,
         )
         return conn
 
@@ -166,27 +166,38 @@ def main():
 
         pool = get_pool()
 
+        insert_product = sqlalchemy.text(
+            "INSERT INTO products (manufacturer_code) VALUES (:manufacturer_code) RETURNING *"
+        )
+
         with pool.connect() as db_conn:
+
             result = db_conn.execute(
-                "INSERT INTO products (manufacturer_code) VALUES (%s) RETURNING *",
-                manufacturer_code,
+                insert_product,
+                parameters={"manufacturer_code": manufacturer_code},
             )
             inserted_id = result.fetchone()[0]
             db_conn.commit()
 
         data = scrape(manufacturer_code)
 
+        insert_price = sqlalchemy.text(
+            "INSERT INTO prices (product_id, price_xkom, price_morele, price_media_expert) VALUES (:product_id, :price_xkom, :price_morele, :price_media_expert)"
+        )
+
         with pool.connect() as db_conn:
             db_conn.execute(
-                "INSERT INTO prices (product_id, price_xkom, price_morele, price_media_expert) VALUES (%d, %d, %d, %d)",
-                inserted_id,
-                data["x-kom"],
-                data["morele"],
-                data["media_expert"]
+                insert_price,
+                parameters={
+                    "product_id": inserted_id,
+                    "price_xkom": data["x-kom"],
+                    "price_morele": data["morele"],
+                    "price_media_expert": data["media_expert"],
+                },
             )
             db_conn.commit()
-        
-        return 'OK'
+
+        return "OK"
 
     if request.method == "PUT":
         pass
