@@ -152,10 +152,67 @@ def scrape(manufacturer_code: str):
         }
 
         return data
+    
+    
+def insert_product(pool, manufacturer_code):
+    insert_product = sqlalchemy.text(
+        "INSERT INTO products (manufacturer_code, created_at) VALUES (:manufacturer_code, :created_at) RETURNING *"
+    )
+
+    with pool.connect() as db_conn:
+        result = db_conn.execute(
+            insert_product,
+            parameters={
+                "manufacturer_code": manufacturer_code,
+                "created_at": sqlalchemy.func.now(),
+            },
+        )
+        inserted_id = result.fetchone()[0]
+        db_conn.commit()
+    
+    return inserted_id
+
+
+def insert_price(pool, product_id, data):
+    insert_price = sqlalchemy.text(
+        "INSERT INTO prices (product_id, created_at, price_xkom, price_morele, price_media_expert) VALUES (:product_id, :created_at, :price_xkom, :price_morele, :price_media_expert)"
+    )
+
+    with pool.connect() as db_conn:
+        db_conn.execute(
+            insert_price,
+            parameters={
+                "product_id": product_id,
+                "created_at": sqlalchemy.func.now(),
+                "price_xkom": data["x-kom"],
+                "price_morele": data["morele"],
+                "price_media_expert": data["media_expert"],
+            },
+        )
+        db_conn.commit()
+        
+
+def get_not_refreshed_products(pool, quantity=5):
+    with pool.connect() as db_conn:
+        query = sqlalchemy.text(f"""
+            SELECT * 
+            FROM products 
+            WHERE id NOT IN (
+                SELECT product_id
+                FROM prices
+                WHERE created_at >= CURRENT_DATE
+            )
+            LIMIT {quantity}
+        """)
+        result = db_conn.execute(query)
+        rows = result.fetchall()
+        
+        return rows
 
 
 @app.route("/", methods=["POST", "PUT"])
 def main():
+    pool = get_pool()
     if request.method == "POST":
         data = request.get_json(silent=True)
 
@@ -163,45 +220,22 @@ def main():
             return jsonify({"error": "No JSON data provided"}), 400
 
         manufacturer_code = data.get("manufacturer_code")
-
-        pool = get_pool()
-
-        insert_product = sqlalchemy.text(
-            "INSERT INTO products (manufacturer_code) VALUES (:manufacturer_code) RETURNING *"
-        )
-
-        with pool.connect() as db_conn:
-
-            result = db_conn.execute(
-                insert_product,
-                parameters={"manufacturer_code": manufacturer_code},
-            )
-            inserted_id = result.fetchone()[0]
-            db_conn.commit()
+        inserted_id = insert_product(pool, manufacturer_code)
 
         data = scrape(manufacturer_code)
-
-        insert_price = sqlalchemy.text(
-            "INSERT INTO prices (product_id, date, price_xkom, price_morele, price_media_expert) VALUES (:product_id, :date, :price_xkom, :price_morele, :price_media_expert)"
-        )
-        print(inserted_id)
-        with pool.connect() as db_conn:
-            db_conn.execute(
-                insert_price,
-                parameters={
-                    "product_id": inserted_id,
-                    "date": sqlalchemy.func.now(),
-                    "price_xkom": data["x-kom"],
-                    "price_morele": data["morele"],
-                    "price_media_expert": data["media_expert"],
-                },
-            )
-            db_conn.commit()
+        insert_price(pool, inserted_id, data)
 
         return "OK"
 
     if request.method == "PUT":
-        pass
+        rows = get_not_refreshed_products(pool)
+        
+        for row in rows:
+            row_dict = dict(row)
+            data = scrape(row_dict['manufacturer_code'])
+            insert_price(pool, row_dict['id'], data)
+            
+        return "OK"
 
 
 if __name__ == "__main__":
