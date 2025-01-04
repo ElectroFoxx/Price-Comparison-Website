@@ -205,7 +205,7 @@ def get_not_refreshed_products(pool, quantity=5):
             LIMIT {quantity}
         """)
         result = db_conn.execute(query)
-        rows = result.fetchall()
+        rows = result.mappings().all()
         
         return rows
 
@@ -231,9 +231,8 @@ def main():
         rows = get_not_refreshed_products(pool)
         
         for row in rows:
-            row_dict = dict(row)
-            data = scrape(row_dict['manufacturer_code'])
-            insert_price(pool, row_dict['id'], data)
+            data = scrape(row['manufacturer_code'])
+            insert_price(pool, row['id'], data)
             
         return "OK"
 
