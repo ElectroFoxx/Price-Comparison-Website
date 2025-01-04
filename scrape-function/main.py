@@ -234,7 +234,7 @@ def main():
             data = scrape(row['manufacturer_code'])
             insert_price(pool, row['id'], data)
             
-        return "OK"
+        return "OK" if len(rows) == 5 else "DONE"
 
 
 if __name__ == "__main__":
