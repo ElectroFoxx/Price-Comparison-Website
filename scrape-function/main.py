@@ -167,10 +167,10 @@ def insert_product(pool, manufacturer_code):
                 "created_at": sqlalchemy.func.now(),
             },
         )
-        inserted_id = result.fetchone()[0]
+        row = result.mappings().fetchone()
         db_conn.commit()
     
-    return inserted_id
+    return row['id']
 
 
 def insert_price(pool, product_id, data):
