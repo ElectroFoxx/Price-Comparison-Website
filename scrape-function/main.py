@@ -225,7 +225,7 @@ def main():
         data = scrape(manufacturer_code)
         insert_price(pool, inserted_id, data)
 
-        return "OK"
+        return inserted_id
 
     if request.method == "PUT":
         rows = get_not_refreshed_products(pool)
