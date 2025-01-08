@@ -3,3 +3,4 @@ playwright
 cloud-sql-python-connector[pg8000]
 SQLAlchemy
 waitress
+sendgrid

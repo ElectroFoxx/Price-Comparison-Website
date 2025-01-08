@@ -3,6 +3,8 @@ from google.cloud.sql.connector import Connector
 import sqlalchemy
 from flask import Flask, request, jsonify
 from playwright.sync_api import sync_playwright
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 def get_pool():
@@ -235,6 +237,24 @@ def main():
             insert_price(pool, row['id'], data)
             
         return "OK" if len(rows) == 5 else "DONE"
+    
+    
+@app.route("/sendtest")
+def send():
+    message = Mail(
+    from_email='maciejd@student.agh.edu.pl',
+    to_emails='duupen@undeep.xyz',
+    subject='Sending with Twilio SendGrid is Fun',
+    html_content='<strong>and easy to do anywhere, even with Python</strong>')
+    try:
+        sg = SendGridAPIClient(os.environ['SEND_GRID_API'])
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(str(e))
+    return "OK"
 
 
 if __name__ == "__main__":
