@@ -293,6 +293,7 @@ def main():
         data = request.get_json(silent=True)
 
         if not data:
+            pool.dispose()
             return jsonify({"error": "No JSON data provided"}), 400
 
         manufacturer_code = data.get("manufacturer_code")
@@ -300,6 +301,7 @@ def main():
 
         data = scrape(manufacturer_code)
         insert_price(pool, inserted_id, data)
+        pool.dispose()
 
         return str(inserted_id)
 
@@ -309,6 +311,7 @@ def main():
         for row in rows:
             data = scrape(row['manufacturer_code'])
             insert_price(pool, row['id'], data)
+        pool.dispose()
             
         return "OK" if len(rows) == 5 else "DONE"
     
@@ -320,10 +323,12 @@ def send():
     not_emailed_product = get_not_emailed_product(pool)
     
     if len(not_emailed_product == 0):
+        pool.dispose()
         return "DONE"
     product_id = not_emailed_product['id']
     min_price = get_min_price(pool, product_id)
     emails = get_interested_users_emails(pool, product_id, min_price)
+    pool.dispose()
     
     message = Mail(
     from_email='maciejd@student.agh.edu.pl',
@@ -336,6 +341,7 @@ def send():
     except Exception as e:
         print(str(e))
     return "OK"
+
 
 
 if __name__ == "__main__":
