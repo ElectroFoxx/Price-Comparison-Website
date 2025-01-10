@@ -159,7 +159,7 @@ def scrape(manufacturer_code: str):
     
 def insert_product(pool, manufacturer_code):
     insert_product = sqlalchemy.text(
-        "INSERT INTO products (manufacturer_code, created_at) VALUES (:manufacturer_code, :created_at) RETURNING *"
+        "INSERT INTO products (manufacturer_code, created_at, emailed_at) VALUES (:manufacturer_code, :created_at, :emailed_at) RETURNING *"
     )
 
     with pool.connect() as db_conn:
