@@ -155,8 +155,8 @@ def scrape(manufacturer_code: str):
         }
 
         return data
-    
-    
+
+
 def insert_product(pool, manufacturer_code):
     insert_product = sqlalchemy.text(
         "INSERT INTO products (manufacturer_code, created_at, emailed_at) VALUES (:manufacturer_code, :created_at, :emailed_at) RETURNING *"
@@ -168,13 +168,13 @@ def insert_product(pool, manufacturer_code):
             parameters={
                 "manufacturer_code": manufacturer_code,
                 "created_at": sqlalchemy.func.now(),
-                "emailed_at": datetime.now() - timedelta(days=1)
+                "emailed_at": datetime.now() - timedelta(days=1),
             },
         )
         row = result.mappings().fetchone()
         db_conn.commit()
-    
-    return row['id']
+
+    return row["id"]
 
 
 def insert_price(pool, product_id, data):
@@ -194,11 +194,12 @@ def insert_price(pool, product_id, data):
             },
         )
         db_conn.commit()
-        
+
 
 def get_not_refreshed_products(pool, quantity=5):
     with pool.connect() as db_conn:
-        query = sqlalchemy.text(f"""
+        query = sqlalchemy.text(
+            f"""
             SELECT * 
             FROM products 
             WHERE id NOT IN (
@@ -207,15 +208,18 @@ def get_not_refreshed_products(pool, quantity=5):
                 WHERE created_at >= CURRENT_DATE
             )
             LIMIT {quantity}
-        """)
+        """
+        )
         result = db_conn.execute(query)
         rows = result.mappings().all()
-        
+
         return rows
-    
+
+
 def get_not_refreshed_products(pool, quantity=5):
     with pool.connect() as db_conn:
-        query = sqlalchemy.text(f"""
+        query = sqlalchemy.text(
+            f"""
             SELECT * 
             FROM products 
             WHERE id NOT IN (
@@ -224,67 +228,90 @@ def get_not_refreshed_products(pool, quantity=5):
                 WHERE created_at >= CURRENT_DATE
             )
             LIMIT {quantity}
-        """)
+        """
+        )
         result = db_conn.execute(query)
         rows = result.mappings().all()
-        
+
         return rows
-    
+
+
 def get_not_emailed_product(pool):
     with pool.connect() as db_conn:
-        query = sqlalchemy.text(f"""
+        query = sqlalchemy.text(
+            f"""
             SELECT * 
             FROM products 
             WHERE emailed_at < CURRENT_DATE
             LIMIT 1
-        """)
+        """
+        )
         result = db_conn.execute(query)
         rows = result.mappings().all()
-        
+
         return rows
-    
+
+
 def get_min_price(pool, product_id):
     with pool.connect() as db_conn:
-        query = sqlalchemy.text(f"""
+        query = sqlalchemy.text(
+            f"""
             SELECT *
             FROM prices 
             WHERE product_id = {product_id}
             AND created_at >= CURRENT_DATE
             LIMIT 1
-        """)
+        """
+        )
         result = db_conn.execute(query)
         row = result.mappings().all()[0]
-        
-        price_media_expert = int(row['price_media_expert'])
-        price_morele = int(row['price_morele'])
-        price_xkom = int(row['price_xkom'])
-        
-        
+
+        price_media_expert = int(row["price_media_expert"])
+        price_morele = int(row["price_morele"])
+        price_xkom = int(row["price_xkom"])
+
         numbers = [price_media_expert, price_morele, price_xkom]
         numbers = [x for x in numbers if x != 0]
-    
+
         if not numbers:
             return None
-    
+
         return min(numbers)
-    
+
 
 def get_interested_users_emails(pool, product_id, lowest_price):
     with pool.connect() as db_conn:
-        query = sqlalchemy.text(f"""
+        query = sqlalchemy.text(
+            f"""
             SELECT u.email
             FROM subscriptions s
             JOIN users u
             ON u.id = s.user_id
             WHERE s.product_id = {product_id}
             AND s.price <= {lowest_price}
-        """)
+        """
+        )
         result = db_conn.execute(query)
         rows = result.mappings().all()
-        
-        emails = [row['email'] for row in rows]
-    
+
+        emails = [row["email"] for row in rows]
+
         return min(emails)
+
+
+def update_product(pool, product_id):
+    with pool.connect() as db_conn:
+        query = sqlalchemy.text(
+            f"""
+            UPDATE products
+            SET emailed_at = :emailed_at
+            WHERE id = :product_id
+        """
+        )
+        db_conn.execute(
+            query,
+            parameters={"product_id": product_id, "emailed_at": sqlalchemy.func.now()},
+        )
 
 
 @app.route("/", methods=["POST", "PUT"])
@@ -308,41 +335,42 @@ def main():
 
     if request.method == "PUT":
         rows = get_not_refreshed_products(pool)
-        
+
         for row in rows:
-            data = scrape(row['manufacturer_code'])
-            insert_price(pool, row['id'], data)
+            data = scrape(row["manufacturer_code"])
+            insert_price(pool, row["id"], data)
         pool.dispose()
-            
+
         return "OK" if len(rows) == 5 else "DONE"
-    
-    
+
+
 @app.route("/email", methods=["PUT"])
 def send():
     pool = get_pool()
-    
+
     not_emailed_product = get_not_emailed_product(pool)
-    
+
     if len(not_emailed_product) == 0:
         pool.dispose()
         return "DONE"
-    product_id = not_emailed_product[0]['id']
+    product_id = not_emailed_product[0]["id"]
     min_price = get_min_price(pool, product_id)
     emails = get_interested_users_emails(pool, product_id, min_price)
-    pool.dispose()
-    
+
     message = Mail(
-    from_email='maciejd@student.agh.edu.pl',
-    to_emails=emails,
-    subject='Price Alert',
-    html_content=f'Product {not_emailed_product[0]['manufacturer_code']} at price {min_price}')
+        from_email="maciejd@student.agh.edu.pl",
+        to_emails=emails,
+        subject="Price Alert",
+        html_content=f"Product {not_emailed_product[0]['manufacturer_code']} at price {min_price}",
+    )
     try:
-        sg = SendGridAPIClient(os.environ['SEND_GRID_API'])
+        sg = SendGridAPIClient(os.environ["SEND_GRID_API"])
         sg.send(message)
+        update_product(product_id)
     except Exception as e:
         print(str(e))
+    pool.dispose()
     return "OK"
-
 
 
 if __name__ == "__main__":
