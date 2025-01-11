@@ -322,7 +322,7 @@ def send():
     
     not_emailed_product = get_not_emailed_product(pool)
     
-    if len(not_emailed_product == 0):
+    if len(not_emailed_product) == 0:
         pool.dispose()
         return "DONE"
     product_id = not_emailed_product['id']
