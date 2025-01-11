@@ -275,6 +275,7 @@ def get_interested_users_emails(pool, product_id, lowest_price):
             SELECT u.email
             FROM subscriptions s
             JOIN users u
+            ON u.id = s.user_id
             WHERE s.product_id = {product_id}
             AND s.price <= {lowest_price}
         """)
