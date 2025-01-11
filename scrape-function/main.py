@@ -335,7 +335,7 @@ def send():
     from_email='maciejd@student.agh.edu.pl',
     to_emails=emails,
     subject='Price Alert',
-    html_content=f'Product {not_emailed_product['manufacturer_code']} at price {min_price}')
+    html_content=f'Product {not_emailed_product[0]['manufacturer_code']} at price {min_price}')
     try:
         sg = SendGridAPIClient(os.environ['SEND_GRID_API'])
         sg.send(message)
