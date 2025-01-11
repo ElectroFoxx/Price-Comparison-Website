@@ -366,7 +366,7 @@ def send():
     try:
         sg = SendGridAPIClient(os.environ["SEND_GRID_API"])
         sg.send(message)
-        update_product(product_id)
+        update_product(pool, product_id)
     except Exception as e:
         print(str(e))
     pool.dispose()
