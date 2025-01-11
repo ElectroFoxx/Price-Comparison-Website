@@ -325,7 +325,7 @@ def send():
     if len(not_emailed_product) == 0:
         pool.dispose()
         return "DONE"
-    product_id = not_emailed_product['id']
+    product_id = not_emailed_product[0]['id']
     min_price = get_min_price(pool, product_id)
     emails = get_interested_users_emails(pool, product_id, min_price)
     pool.dispose()
