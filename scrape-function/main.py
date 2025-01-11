@@ -168,7 +168,7 @@ def insert_product(pool, manufacturer_code):
             parameters={
                 "manufacturer_code": manufacturer_code,
                 "created_at": sqlalchemy.func.now(),
-                "emailed_at": sqlalchemy.func.now() - datetime.timedelta(days=1)
+                "emailed_at": datetime.now() - datetime.timedelta(days=1)
             },
         )
         row = result.mappings().fetchone()
