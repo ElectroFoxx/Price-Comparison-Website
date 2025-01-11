@@ -312,6 +312,7 @@ def update_product(pool, product_id):
             query,
             parameters={"product_id": product_id, "emailed_at": sqlalchemy.func.now()},
         )
+        db_conn.commit()
 
 
 @app.route("/", methods=["POST", "PUT"])
