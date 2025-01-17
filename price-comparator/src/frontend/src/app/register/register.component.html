@@ -1,0 +1,46 @@
+<div class="container">
+<section class=" text-center text-lg-start">
+  <div class="card mb-3">
+    <div class="row g-0 d-flex align-items-center">
+      <div class="col-lg-8">
+        <div class="card-body py-5 px-md-5">
+          <form>
+            <div class="form-outline mb-4">
+              <input
+                type="text"
+                [(ngModel)]="username"
+                name="username"
+                class="form-control"
+                placeholder="Enter your username"
+              />
+            </div>
+
+            <div class="form-outline mb-4">
+              <input
+                type="email"
+                [(ngModel)]="email"
+                name="email"
+                class="form-control"
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div class="form-outline mb-4">
+              <input
+                type="password"
+                [(ngModel)]="password"
+                name="password"
+                class="form-control"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-4" (click)="register()">Sign-up</button>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>

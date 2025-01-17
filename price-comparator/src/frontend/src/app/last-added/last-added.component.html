@@ -1,0 +1,8 @@
+<h4 class="mt-5">Last Added Products</h4>
+<div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 g-4">
+  @for (product of products; track product.id)
+  {
+    <app-product-card [code]="product.code" [id]="product.id" [created_at]="product.created_at"/>
+  }
+</div>
+

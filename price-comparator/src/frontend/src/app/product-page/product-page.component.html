@@ -1,0 +1,28 @@
+<h1 class="text-center">Manufacturer code: {{manufacturer_code}}</h1>
+
+<div class='container'>
+  <apx-chart [series]="series" [chart]="chart" [xaxis]="xaxis" [legend]="legend" />
+</div>
+
+@if (isLoggedIn)
+{
+<div class="card mx-5">
+  <div class="card-body">
+    <form #subscriptionForm="ngForm" (ngSubmit)="subscribe()">
+      <div class="form-group">
+        <label class="mb-2" for="amount">Amount (2 decimal places)</label>
+        <input type="number" id="amount" name="amount" class="form-control my-2" [(ngModel)]="amount"
+          pattern="^\d+(\.\d{1,2})?$" required />
+        <div *ngIf="subscriptionForm.form.controls['amount']?.invalid && subscriptionForm.form.controls['amount']?.touched"
+          class="error">
+          Please enter a valid amount (up to 2 decimal places).
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="subscriptionForm.invalid">
+        Subscribe
+      </button>
+    </form>
+  </div>
+</div>
+}

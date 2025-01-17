@@ -1,0 +1,31 @@
+<div class="container">
+  <header
+    class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+    <a routerLink="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+      Price Comparision App
+    </a>
+
+    <div class="col-md-4">
+      <form (submit)="$event.preventDefault(); search();">
+        <input type="search" [(ngModel)]="searchValue" [ngModelOptions]="{standalone: true}" class="form-control"
+          placeholder="Search manufacturer code">
+      </form>
+    </div>
+
+    @if (!isLoggedIn)
+    {
+    <div class="col-md-3 text-end">
+      <button routerLink="/login" type="button" class="btn btn-outline-primary me-2">Login</button>
+      <button routerLink="/register" type="button" class="btn btn-primary">Sign-up</button>
+    </div>
+    }
+    @else
+    {
+      <div class="col-md-3 text-end">
+        <button (click)="logout()" type="button" class="btn btn-outline-primary me-2">Logout</button>
+      </div>
+    }
+  </header>
+</div>
+
+<router-outlet />
