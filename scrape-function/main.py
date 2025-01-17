@@ -276,7 +276,7 @@ def get_min_price(pool, product_id):
         if not numbers:
             return None
 
-        return min(numbers)
+        return min(numbers) / 10
 
 
 def get_interested_users_emails(pool, product_id, lowest_price):
@@ -296,7 +296,7 @@ def get_interested_users_emails(pool, product_id, lowest_price):
 
         emails = [row["email"] for row in rows]
 
-        return min(emails)
+        return emails
 
 
 def update_product(pool, product_id):
