@@ -216,26 +216,6 @@ def get_not_refreshed_products(pool, quantity=5):
         return rows
 
 
-def get_not_refreshed_products(pool, quantity=5):
-    with pool.connect() as db_conn:
-        query = sqlalchemy.text(
-            f"""
-            SELECT * 
-            FROM products 
-            WHERE id NOT IN (
-                SELECT product_id
-                FROM prices
-                WHERE created_at >= CURRENT_DATE
-            )
-            LIMIT {quantity}
-        """
-        )
-        result = db_conn.execute(query)
-        rows = result.mappings().all()
-
-        return rows
-
-
 def get_not_emailed_product(pool):
     with pool.connect() as db_conn:
         query = sqlalchemy.text(
@@ -276,7 +256,7 @@ def get_min_price(pool, product_id):
         if not numbers:
             return None
 
-        return min(numbers) / 10
+        return min(numbers) / 100
 
 
 def get_interested_users_emails(pool, product_id, lowest_price):
@@ -362,7 +342,7 @@ def send():
         from_email="maciejd@student.agh.edu.pl",
         to_emails=emails,
         subject="Price Alert",
-        html_content=f"Product {not_emailed_product[0]['manufacturer_code']} at price {min_price}",
+        html_content=f"Product {not_emailed_product[0]['manufacturer_code']} at price {min_price} https://sabre-final-project.lm.r.appspot.com/product/{product_id}",
     )
     try:
         sg = SendGridAPIClient(os.environ["SEND_GRID_API"])
